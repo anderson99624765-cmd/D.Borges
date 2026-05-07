@@ -1,0 +1,418 @@
+/* =========================================
+   1. VARIÁVEIS E CONFIGURAÇÕES GERAIS
+   ========================================= */
+:root {
+    --vermelho-principal: #B02A37; /* Vermelho da sua logo */
+    --vermelho-escuro: #4A0E0E;    /* Fundo do rodapé/combos */
+    --laranja-detalhes: #FF4500;
+    --verde-whatsapp: #25D366;
+    --cinza-fundo: #f4f4f4;
+    --branco: #ffffff;
+    --texto-escuro: #333333;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif; /* Sugiro importar a Poppins no HTML */
+}
+
+html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 140px; /* Evita que o menu fixo cubra os títulos */
+}
+
+body {
+    background-color: var(--cinza-fundo);
+    color: var(--texto-escuro);
+    padding-bottom: 120px; /* Espaço para o resumo do pedido fixo */
+}
+
+/* =========================================
+   2. HEADER E NAVEGAÇÃO (ESTILO APP)
+   ========================================= */
+.main-header {
+    background-color: var(--vermelho-principal);
+    color: var(--branco);
+    text-align: center;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.logo {
+    width: 130px;
+    height: 130px;
+    border-radius: 50%;
+    border: 5px solid var(--branco);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    margin-bottom: 15px;
+    object-fit: cover;
+}
+
+.menu-categorias {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    background: var(--branco);
+    display: flex;
+    overflow-x: auto;
+    padding: 15px;
+    gap: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    white-space: nowrap;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+}
+
+.menu-categorias::-webkit-scrollbar { display: none; }
+
+.menu-categorias a {
+    text-decoration: none;
+    color: var(--vermelho-principal);
+    border: 1.5px solid var(--vermelho-principal);
+    padding: 8px 22px;
+    border-radius: 25px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    transition: 0.3s;
+}
+
+.menu-categorias a.active {
+    background-color: var(--vermelho-principal);
+    color: var(--branco);
+}
+
+/* =========================================
+   3. SEÇÕES E GRID DE PRODUTOS
+   ========================================= */
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 20px 15px;
+}
+
+.categoria-titulo {
+    font-size: 1.2rem;
+    color: var(--vermelho-principal);
+    text-transform: uppercase;
+    margin: 30px 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.categoria-titulo::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #ddd;
+}
+
+.cardapio {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); /* 2 colunas no celular */
+    gap: 15px;
+}
+
+/* Estilo especial para a Seção de Combos (Fundo Escuro) */
+#combos {
+    background-color: var(--vermelho-escuro);
+    margin: 0 -15px 40px -15px; /* Expande o fundo escuro lateralmente */
+    padding: 20px 15px;
+    border-radius: 0 0 30px 30px;
+}
+
+#combos .categoria-titulo { color: var(--branco); }
+
+/* =========================================
+   4. CARDS DOS ITENS (IGUAL À REFERÊNCIA)
+   ========================================= */
+/* =========================================
+   AJUSTE DE TAMANHO DAS IMAGENS DOS CARDS
+   ========================================= */
+
+/* 1. Garante que o card (contêiner) tenha um tamanho controlado */
+.item-salgado {
+    /* ... mantenha as outras regras (background, border-radius, etc.) ... */
+    
+    /* Controla a largura máxima do card para não ficar gigante em telas grandes */
+    max-width: 300px; 
+    margin: 0 auto; /* Centraliza o card se ele for menor que a coluna do grid */
+    
+    /* Importante para garantir que a imagem não 'vaze' pelas bordas arredondadas */
+    overflow: hidden; 
+    
+    /* Layout interno em coluna para alinhar foto, texto e botões */
+    display: flex;
+    flex-direction: column;
+}
+
+/* 2. Formata a imagem dentro do card */
+.item-salgado img {
+    /* FORÇA a imagem a ocupar toda a largura do card, mas não mais que isso */
+    width: 100%; 
+    
+    /* DEFINE uma altura fixa e padrão para TODAS as imagens */
+    /* Isso deixa o cardápio alinhado e bonito, independente do tamanho original da foto */
+    height: 180px; /* Você pode ajustar esse valor (ex: 150px, 200px) como preferir */
+    
+    /* O SEGREDO: 'object-fit: cover' faz a imagem preencher o espaço (100%x180px) */
+    /* sem esticar ou achatar. Ela será cortada inteligentemente para caber. */
+    object-fit: cover; 
+    
+    /* Opcional: Alinha o corte no centro da imagem */
+    object-position: center; 
+    
+    /* Garante que a foto fique no topo do card */
+    border-top-left-radius: 15px; /* Mesma borda do card (.item-salgado) */
+    border-top-right-radius: 15px;
+}
+
+.combo {
+    color: white;
+}
+
+/* Container fixo no rodapé */
+.carrinho-fixo {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #4A0E0E; /* Vermelho escuro/Vinho das imagens */
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.3);
+    z-index: 9999; /* Garante que fique acima de todos os itens */
+    border-top: 3px solid #FF4500; /* Linha laranja de destaque */
+}
+
+/* Informações de texto do resumo */
+.resumo-info p {
+    font-size: 0.75rem;
+    margin-bottom: 2px;
+    opacity: 0.9;
+    letter-spacing: 1px;
+}
+
+.resumo-info span {
+    font-size: 1.1rem;
+    font-weight: 800;
+}
+
+/* Botão de finalizar dentro do rodapé fixo */
+#btn-finalizar {
+    background-color: #25D366; /* Verde WhatsApp */
+    color: white;
+    border: none;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+#btn-finalizar:active {
+    transform: scale(0.95); /* Efeito de clique no celular */
+}
+
+/* =========================================
+   ESTILIZAÇÃO DO SELETOR DE QUANTIDADE
+   ========================================= */
+
+.seletor-quantidade {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px; /* Espaço entre os botões e o número */
+    margin-top: 10px;
+    padding: 5px;
+}
+
+.seletor-quantidade button {
+    background-color: var(--vermelho-principal); /* A cor vermelha que definimos */
+    color: white;
+    border: none;
+    width: 32px;  /* Tamanho ideal para o dedo no celular */
+    height: 32px;
+    border-radius: 8px; /* Bordas levemente arredondadas como na foto */
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, transform 0.1s;
+    /* Remove o azul chato que aparece ao clicar no celular */
+    -webkit-tap-highlight-color: transparent; 
+}
+
+/* Efeito ao clicar/tocar */
+.seletor-quantidade button:active {
+    background-color: #8a1f29; /* Um vermelho mais escuro no clique */
+    transform: scale(0.9); /* Diminui levemente para dar sensação de clique */
+}
+
+.qtd-numero {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--texto-escuro);
+    min-width: 20px; /* Evita que o layout "pule" quando mudar de 0 para 10 */
+    text-align: center;
+}
+
+/* Isso força os botões e o número a ficarem na mesma linha */
+.seletor-quantidade {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 15px; 
+    margin-top: 10px;
+}
+
+/* Garante que os botões tenham um tamanho fixo e não quebrem a linha */
+.seletor-quantidade button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 35px;
+    height: 35px;
+    flex-shrink: 0; /* Impede que o botão amasse */
+}
+
+/* Garante que o número fique centralizado */
+.qtd-numero {
+    min-width: 20px;
+    text-align: center;
+    display: inline-block;
+}
+
+.qtd-numero {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #333;
+    min-width: 25px;         /* Espaço fixo para o número não empurrar os botões */
+    text-align: center;
+    display: inline-block;    /* Garante que o texto se comporte bem no flex */
+}
+
+.dados-entrega {
+    background: #fff;
+    color: #333;
+    padding: 15px;
+    border-radius: 15px 15px 0 0;
+    margin-bottom: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.dados-entrega h3 {
+    font-size: 0.9rem;
+    color: var(--vermelho-principal);
+    margin-bottom: 5px;
+}
+
+.dados-entrega input, .dados-entrega select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.9rem;
+}
+
+/* Ocultar o formulário quando o carrinho estiver vazio (opcional) */
+.carrinho-fixo:not(.ativo) .dados-entrega {
+    display: none;
+}
+
+.resumo-info {
+    display: flex;
+    justify-content: space-between; /* Texto na esquerda, botão na direita */
+    align-items: center;
+    width: 100%;
+    padding-top: 10px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.textos-resumo p {
+    font-size: 0.7rem;
+    margin: 0;
+}
+
+/* 1. Estilo Base (Sempre começa escondido) */
+.dados-entrega {
+    display: none; /* Escondido por padrão */
+    flex-direction: column;
+    gap: 8px;
+    background: #ffffff;
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    width: 100%;
+    box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
+}
+
+/* 2. A Classe que o JavaScript vai "ligar" */
+.dados-entrega.ativo {
+    display: flex !important; /* O !important garante que ele apareça */
+    animation: abrirGaveta 0.3s ease-out;
+}
+
+/* 3. Ajuste do Container do Rodapé */
+.carrinho-fixo {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #4A0E0E;
+    color: white;
+    padding: 15px;
+    display: flex;
+    flex-direction: column; /* Empilha os dados em cima do resumo */
+    z-index: 9999;
+    border-top: 3px solid #FF4500;
+}
+
+/* 4. Ajuste dos inputs para ficarem visíveis (Texto preto no fundo branco) */
+.dados-entrega input, .dados-entrega select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    color: #333; /* Importante: cor do texto para o cliente enxergar o que digita */
+    background-color: #fff;
+}
+
+.dados-entrega {
+    gap: 10px; /* Aumentei um pouco o espaço entre os campos */
+}
+
+/* Dica: se o formulário estiver cobrindo muito a tela no celular, 
+   podemos colocar o Endereço e o Bairro um do lado do outro */
+/* Opcional: use apenas se quiser economizar espaço */
+/*
+.dados-entrega input#endereco-cliente { width: 60%; }
+.dados-entrega input#bairro-cliente { width: 38%; }
+*/
+
+.input-linha {
+    display: flex;
+    justify-content: space-between;
+    gap: 5%; /* Espaço entre o número e o bairro */
+}
+
+/* Garante que os inputs dentro da linha se comportem bem */
+.input-linha input {
+    margin-bottom: 0; 
+}
