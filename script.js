@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let precoTotal = 0.0;
     const carrinho = {}; 
 
-    // --- 1. LÓGICA DE ADICIONAR/REMOVER SALGADOS ---
     window.alterarQtd = (botao, mudanca) => {
         const itemElement = botao.closest('.item-salgado');
         const nome = itemElement.getAttribute('data-nome');
@@ -40,7 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     window.enviarPedido = () => {
-    // ... (verificação de carrinho vazio)
 
     const divDados = document.getElementById('dados-entrega');
     const botao = document.getElementById('btn-finalizar');
@@ -51,22 +49,17 @@ document.addEventListener('DOMContentLoaded', () => {
         botao.style.backgroundColor = "#25D366";
         return;
     }
-
-    // CAPTURA DE TODOS OS DADOS
     const nome = document.getElementById('nome-cliente').value.trim();
     const rua = document.getElementById('endereco-cliente').value.trim();
-    const numero = document.getElementById('numero-casa').value.trim(); // NOVO
+    const numero = document.getElementById('numero-casa').value.trim();
     const bairro = document.getElementById('bairro-cliente').value.trim();
     const referencia = document.getElementById('ponto-referencia').value.trim();
     const pagamento = document.getElementById('pagamento').value;
 
-    // VALIDAÇÃO (Campos obrigatórios)
     if (!nome || !rua || !numero || !bairro) {
         alert("Por favor, preencha nome, rua, número e bairro!");
         return;
     }
-
-    // MONTAGEM DA MENSAGEM PARA O WHATSAPP
     let mensagem = `*Novo Pedido - D'Borges Salgados*\n`;
     mensagem += `━━━━━━━━━━━━━━━━━━━━\n`;
     mensagem += `👤 *Cliente:* ${nome}\n`;
@@ -75,8 +68,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if(referencia) mensagem += `🔍 *Ref:* ${referencia}\n`;
     mensagem += `💳 *Pagamento:* ${pagamento}\n`;
     mensagem += `━━━━━━━━━━━━━━━━━━━━\n\n`;
-    
-    // ... (restante do código de envio)
 
     for (const item in carrinho) {
         mensagem += `✅ ${carrinho[item].qtd}x ${item}\n`;
@@ -86,8 +77,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const fone = "5574999624765"; 
     window.open(`https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`, '_blank');
 };
-
-    // --- 3. NAVEGAÇÃO E SCROLLSPY ---
     const secoes = document.querySelectorAll('.secao-categoria');
     const linksMenu = document.querySelectorAll('.menu-categorias a');
 
