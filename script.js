@@ -1,8 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- VARIÁVEIS GLOBAIS DO SISTEMA ---
     let totalItens = 0;
-    let precoTotal = 0.0;
-    const carrinho = {}; 
+    let precoTotalProdutos = 0.0;
+    let taxaEntregaAtual = 0.0;
+    const carrinho = {};
 
     window.alterarQtd = (botao, mudanca) => {
         const itemElement = botao.closest('.item-salgado');
@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (qtdAtual >= 0) {
             qtdElement.innerText = qtdAtual;
-            
             if (qtdAtual > 0) {
                 carrinho[nome] = { qtd: qtdAtual, preco: preco };
             } else {
@@ -27,79 +26,165 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function atualizarResumo() {
         totalItens = 0;
-        precoTotal = 0;
-
+        precoTotalProdutos = 0;
         for (const item in carrinho) {
             totalItens += carrinho[item].qtd;
-            precoTotal += carrinho[item].qtd * carrinho[item].preco;
+            precoTotalProdutos += carrinho[item].qtd * carrinho[item].preco;
         }
+        const totalItensElement = document.getElementById('total-itens');
+        if (totalItensElement) totalItensElement.innerText = totalItens;
+        atualizarTotalGeral();
+    }
 
-        document.getElementById('total-itens').innerText = totalItens;
-        document.getElementById('preco-total').innerText = precoTotal.toFixed(2).replace('.', ',');
+    window.calcularFrete = () => {
+        const seletor = document.getElementById('bairro');
+        if (!seletor || seletor.value === "") return;
+
+        taxaEntregaAtual = parseFloat(seletor.value);
+        const bairroNome = seletor.options[seletor.selectedIndex].text;
+        const divTaxa = document.getElementById('exibicao-taxa');
+        const textoTaxa = document.getElementById('texto-taxa');
+
+        if (divTaxa) divTaxa.style.display = 'block';
+
+        if (taxaEntregaAtual === 0) {
+            if (textoTaxa) {
+                textoTaxa.innerHTML = `<strong>✅ Entrega Grátis</strong> para ${bairroNome}`;
+                textoTaxa.style.color = "#27ae60";
+            }
+        } else {
+            if (textoTaxa) {
+                textoTaxa.innerHTML = `<strong>🛵 Taxa: R$ ${taxaEntregaAtual.toFixed(2).replace('.', ',')}</strong> (${bairroNome})`;
+                textoTaxa.style.color = "#e67e22";
+            }
+        }
+        atualizarTotalGeral();
+    };
+
+    const campoBairro = document.getElementById('bairro');
+    if (campoBairro) {
+        campoBairro.addEventListener('change', function() {
+            const nomeDoBairro = this.options[this.selectedIndex].text;
+            if (nomeDoBairro.trim().toLowerCase() !== "novo oeste" && precoTotalProdutos < 18.00 && this.value !== "") {
+                alert("Atenção: Para entregas no bairro " + nomeDoBairro + ", o valor mínimo é R$ 18,00.");
+                this.value = "";
+                if (document.getElementById('exibicao-taxa')) document.getElementById('exibicao-taxa').style.display = 'none';
+                taxaEntregaAtual = 0;
+                atualizarTotalGeral();
+            }
+        });
+    }
+
+    function atualizarTotalGeral() {
+        const totalFinal = precoTotalProdutos + taxaEntregaAtual;
+        const display = document.getElementById('preco-total');
+        if (display) display.innerText = totalFinal.toFixed(2).replace('.', ',');
     }
 
     window.enviarPedido = () => {
+        if (totalItens === 0) {
+            alert("Seu carrinho está vazio!");
+            return;
+        }
 
-    const divDados = document.getElementById('dados-entrega');
-    const botao = document.getElementById('btn-finalizar');
+        const divDados = document.getElementById('dados-entrega');
+        const botao = document.getElementById('btn-finalizar');
 
-    if (!divDados.classList.contains('ativo')) {
-        divDados.classList.add('ativo');
-        botao.innerText = "Confirmar e Enviar Pedido";
-        botao.style.backgroundColor = "#25D366";
-        return;
-    }
-    const nome = document.getElementById('nome-cliente').value.trim();
-    const rua = document.getElementById('endereco-cliente').value.trim();
-    const numero = document.getElementById('numero-casa').value.trim();
-    const bairro = document.getElementById('bairro-cliente').value.trim();
-    const referencia = document.getElementById('ponto-referencia').value.trim();
-    const pagamento = document.getElementById('pagamento').value;
+        if (!divDados.classList.contains('ativo')) {
+            divDados.classList.add('ativo');
+            botao.innerText = "Confirmar e Enviar Pedido";
+            botao.style.backgroundColor = "#25D366";
+            document.getElementById('btn-voltar').style.display = "block";
+            return; 
+        }
 
-    if (!nome || !rua || !numero || !bairro) {
-        alert("Por favor, preencha nome, rua, número e bairro!");
-        return;
-    }
-    let mensagem = `*Novo Pedido - D'Borges Salgados*\n`;
-    mensagem += `━━━━━━━━━━━━━━━━━━━━\n`;
-    mensagem += `👤 *Cliente:* ${nome}\n`;
-    mensagem += `📍 *Endereço:* ${rua}, Nº ${numero}\n`; // ADICIONADO NÚMERO
-    mensagem += `🏘️ *Bairro:* ${bairro}\n`;
-    if(referencia) mensagem += `🔍 *Ref:* ${referencia}\n`;
-    mensagem += `💳 *Pagamento:* ${pagamento}\n`;
-    mensagem += `━━━━━━━━━━━━━━━━━━━━\n\n`;
+        const seletorBairro = document.getElementById('bairro');
+        if (!seletorBairro || seletorBairro.value === "") {
+            alert("Selecione um bairro!");
+            return;
+        }
 
-    for (const item in carrinho) {
-        mensagem += `✅ ${carrinho[item].qtd}x ${item}\n`;
-    }
-    mensagem += `\n*TOTAL: R$ ${precoTotal.toFixed(2)}*`;
+        const nome = document.getElementById('nome-cliente').value.trim();
+        const rua = document.getElementById('endereco-cliente').value.trim();
+        const numero = document.getElementById('numero-casa').value.trim();
+        const pagamento = document.getElementById('pagamento').value;
+        const bairroNome = seletorBairro.options[seletorBairro.selectedIndex].text;
 
-    const fone = "5574999624765"; 
-    window.open(`https://wa.me/${fone}?text=${encodeURIComponent(mensagem)}`, '_blank');
-};
-    const secoes = document.querySelectorAll('.secao-categoria');
-    const linksMenu = document.querySelectorAll('.menu-categorias a');
+        if (!nome || !rua || !numero) {
+            alert("Preencha todos os dados de entrega!");
+            return;
+        }
 
-    linksMenu.forEach(link => {
-        link.addEventListener('click', function() {
-            linksMenu.forEach(l => l.classList.remove('active'));
-            this.classList.add('active');
-            this.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
-        });
-    });
+        let mensagem = `*Novo Pedido - D'Borges Salgados*\n━━━━━━━━━━━━━━━━━━━━\n`;
+        mensagem += `👤 *Cliente:* ${nome}\n📍 *Endereço:* ${rua}, Nº ${numero}\n🏘️ *Bairro:* ${bairroNome}\n💳 *Pagamento:* ${pagamento}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const id = entry.target.getAttribute('id');
-                const linkAtivo = document.querySelector(`.menu-categorias a[href="#${id}"]`);
-                if (linkAtivo) {
-                    linksMenu.forEach(l => l.classList.remove('active'));
-                    linkAtivo.classList.add('active');
-                }
-            }
-        });
-    }, { rootMargin: '-30% 0px -60% 0px' });
+        for (const item in carrinho) {
+            mensagem += `✅ ${carrinho[item].qtd}x ${item}\n`;
+        }
+        
+        mensagem += taxaEntregaAtual > 0 ? `\n🛵 *Frete:* R$ ${taxaEntregaAtual.toFixed(2).replace('.', ',')}` : `\n🛵 *Frete:* Grátis`;
+        mensagem += `\n*TOTAL FINAL: R$ ${(precoTotalProdutos + taxaEntregaAtual).toFixed(2).replace('.', ',')}*`;
 
-    secoes.forEach(secao => observer.observe(secao));
+        window.open(`https://wa.me/557498105859?text=${encodeURIComponent(mensagem)}`, '_blank');
+    };
+
+    window.fecharDadosEntrega = () => {
+        document.getElementById('dados-entrega').classList.remove('ativo');
+        const btn = document.getElementById('btn-finalizar');
+        btn.innerText = "Finalizar via WhatsApp";
+        btn.style.backgroundColor = "";
+        document.getElementById('btn-voltar').style.display = "none";
+    };
 });
+
+function monitorarStatusLoja() {
+    if (typeof firebase === 'undefined') return;
+    firebase.database().ref('configuracoes/statusLoja').on('value', (snapshot) => {
+        const estaAberta = snapshot.val();
+        const overlay = document.getElementById('overlay-fechado');
+        if (!overlay) return;
+        if (estaAberta) {
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        } else {
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+            window.scrollTo(0, 0);
+        }
+    });
+}
+monitorarStatusLoja();
+
+const SENHA_CORRETA = "1234";
+document.addEventListener('keydown', (event) => {
+    if (event.altKey && (event.key === 'a' || event.key === 'A')) {
+        const modal = document.getElementById('modal-admin');
+        if (modal) {
+            modal.style.display = 'block';
+            modal.style.pointerEvents = 'auto';
+        }
+    }
+});
+
+window.verificarSenha = function() {
+    const campoSenha = document.getElementById('senha-admin');
+    if (campoSenha.value === SENHA_CORRETA) {
+        document.getElementById('admin-login').style.display = 'none';
+        document.getElementById('admin-controles').style.display = 'block';
+    } else {
+        alert("Senha incorreta!");
+    }
+};
+
+window.alternarLoja = function(status) {
+    if (typeof firebase !== 'undefined') {
+        firebase.database().ref('configuracoes/statusLoja').set(status)
+            .then(() => {
+                alert(status ? "Loja Aberta! ✅" : "Loja Fechada! 🔒");
+                document.getElementById('modal-admin').style.display = 'none';
+                document.getElementById('admin-login').style.display = 'block';
+                document.getElementById('admin-controles').style.display = 'none';
+                document.getElementById('senha-admin').value = "";
+            });
+    }
+};
