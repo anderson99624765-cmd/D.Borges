@@ -38,3 +38,8 @@
 Frontend:  Ex: React / HTML & CSS / JavaScript
 Backend:Node. js / Firebase / PHP 
 </p>
+
+<br>
+<img src="https://github.com/dborges-salgadaria/D.Borges/blob/main/img/print.phone.png?raw=true">
+<img src="https://github.com/dborges-salgadaria/D.Borges/blob/main/img/print.pc.png?raw=true">
+
