@@ -2,14 +2,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let totalItens = 0;
     let precoTotalProdutos = 0.0;
     let taxaEntregaAtual = 0.0;
+    let taxaSalvaTemporaria = 0.0; 
     const carrinho = {};
+    let modoAtual = "entrega";
 
     window.alterarQtd = (botao, mudanca) => {
         const itemElement = botao.closest('.item-salgado');
         const nome = itemElement.getAttribute('data-nome');
         const preco = parseFloat(itemElement.getAttribute('data-preco'));
         const qtdElement = itemElement.querySelector('.qtd-numero');
-        
+
         let qtdAtual = parseInt(qtdElement.innerText);
         qtdAtual += mudanca;
 
@@ -23,6 +25,58 @@ document.addEventListener('DOMContentLoaded', () => {
             atualizarResumo();
         }
     };
+
+    const btnEntrega = document.getElementById('btn-entrega');
+    const btnRetirada = document.getElementById('btn-retirada');
+    const secaoEndereco = document.getElementById('secao-endereco');
+    const inputsEndereco = document.querySelectorAll("#secao-endereco input, #secao-endereco select");
+
+    function alternarModo(modo) {
+        modoAtual = modo;
+        if (modo === "retirada") {
+            btnRetirada.classList.remove('inativo');
+            btnEntrega.classList.add('inativo');
+
+            secaoEndereco.classList.add("secao-desativada");
+            inputsEndereco.forEach(input => input.disabled = true);
+
+            taxaSalvaTemporaria = taxaEntregaAtual; 
+            taxaEntregaAtual = 0;
+            if (document.getElementById('exibicao-taxa')) {
+                document.getElementById('exibicao-taxa').style.display = 'none';
+            }
+        } else {
+            btnEntrega.classList.remove('inativo');
+            btnRetirada.classList.add('inativo');
+
+            secaoEndereco.classList.remove("secao-desativada");
+            inputsEndereco.forEach(input => input.disabled = false);
+
+            taxaEntregaAtual = taxaSalvaTemporaria;
+            if (taxaEntregaAtual > 0 && document.getElementById('exibicao-taxa')) {
+                document.getElementById('exibicao-taxa').style.display = 'block';
+            }
+        }
+        atualizarTotalGeral();
+    }
+
+    if (btnEntrega) btnEntrega.addEventListener('click', () => alternarModo("entrega"));
+    if (btnRetirada) btnRetirada.addEventListener('click', () => alternarModo("retirada"));
+
+    alternarModo("entrega");
+
+    const botoes = document.querySelectorAll(".tipo-do-pedido");
+    botoes.forEach(botaoClicado => {
+        botaoClicado.addEventListener('click', () => {
+            botoes.forEach(outroBotao => {
+                if (outroBotao === botaoClicado) {
+                    outroBotao.classList.remove('inativo');
+                } else {
+                    outroBotao.classList.add('inativo');
+                }
+            });
+        });
+    });
 
     function atualizarResumo() {
         totalItens = 0;
@@ -41,6 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!seletor || seletor.value === "") return;
 
         taxaEntregaAtual = parseFloat(seletor.value);
+        taxaSalvaTemporaria = taxaEntregaAtual; 
         const bairroNome = seletor.options[seletor.selectedIndex].text;
         const divTaxa = document.getElementById('exibicao-taxa');
         const textoTaxa = document.getElementById('texto-taxa');
@@ -63,13 +118,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const campoBairro = document.getElementById('bairro');
     if (campoBairro) {
-        campoBairro.addEventListener('change', function() {
+        campoBairro.addEventListener('change', function () {
             const nomeDoBairro = this.options[this.selectedIndex].text;
+
             if (nomeDoBairro.trim().toLowerCase() !== "novo oeste" && precoTotalProdutos < 18.00 && this.value !== "") {
                 alert("Atenção: Para entregas no bairro " + nomeDoBairro + ", o valor mínimo é R$ 18,00.");
                 this.value = "";
                 if (document.getElementById('exibicao-taxa')) document.getElementById('exibicao-taxa').style.display = 'none';
                 taxaEntregaAtual = 0;
+                taxaSalvaTemporaria = 0;
                 atualizarTotalGeral();
             }
         });
@@ -95,34 +152,61 @@ document.addEventListener('DOMContentLoaded', () => {
             botao.innerText = "Confirmar e Enviar Pedido";
             botao.style.backgroundColor = "#25D366";
             document.getElementById('btn-voltar').style.display = "block";
-            return; 
-        }
-
-        const seletorBairro = document.getElementById('bairro');
-        if (!seletorBairro || seletorBairro.value === "") {
-            alert("Selecione um bairro!");
             return;
         }
 
         const nome = document.getElementById('nome-cliente').value.trim();
-        const rua = document.getElementById('endereco-cliente').value.trim();
-        const numero = document.getElementById('numero-casa').value.trim();
         const pagamento = document.getElementById('pagamento').value;
-        const bairroNome = seletorBairro.options[seletorBairro.selectedIndex].text;
 
-        if (!nome || !rua || !numero) {
-            alert("Preencha todos os dados de entrega!");
+        if (!nome) {
+            alert("Por favor, preencha seu nome!");
             return;
         }
 
+        let rua = "";
+        let numero = "";
+        let bairroNome = "";
+
+        if (modoAtual === "entrega") {
+            const seletorBairro = document.getElementById("bairro");
+            if (!seletorBairro || seletorBairro.value === "") {
+                alert("Por favor, selecione um bairro!");
+                return;
+            }
+
+            rua = document.getElementById("endereco-cliente").value.trim();
+            numero = document.getElementById("numero-casa").value.trim();
+            bairroNome = seletorBairro.options[seletorBairro.selectedIndex].text;
+
+            if (!rua || !numero) {
+                alert("Preencha todos os dados de entrega!");
+                return;
+            }
+        }
+
         let mensagem = `*Novo Pedido - D'Borges Salgados*\n━━━━━━━━━━━━━━━━━━━━\n`;
-        mensagem += `👤 *Cliente:* ${nome}\n📍 *Endereço:* ${rua}, Nº ${numero}\n🏘️ *Bairro:* ${bairroNome}\n💳 *Pagamento:* ${pagamento}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
+        mensagem += `👤 *Cliente:* ${nome}\n`;
+
+        if (modoAtual === "entrega") {
+            mensagem += `🛵 *Tipo:* Entrega\n`;
+            mensagem += `📍 *Endereço:* ${rua}, Nº ${numero}\n`;
+            mensagem += `🏘️ *Bairro:* ${bairroNome}\n`;
+        } else {
+            mensagem += `🏪 *Tipo:* Retirada no Local\n`;
+        }
+
+        mensagem += `💳 *Pagamento:* ${pagamento}\n━━━━━━━━━━━━━━━━━━━━\n\n`;
 
         for (const item in carrinho) {
             mensagem += `✅ ${carrinho[item].qtd}x ${item}\n`;
         }
-        
-        mensagem += taxaEntregaAtual > 0 ? `\n🛵 *Frete:* R$ ${taxaEntregaAtual.toFixed(2).replace('.', ',')}` : `\n🛵 *Frete:* Grátis`;
+
+        if (modoAtual === "entrega") {
+            mensagem += taxaEntregaAtual > 0 ? `\n🛵 *Frete:* R$ ${taxaEntregaAtual.toFixed(2).replace('.', ',')}` : `\n🛵 *Frete:* Grátis`;
+        } else {
+            mensagem += `\n... *Frete:* Não aplicável (Retirada)`;
+        }
+
         mensagem += `\n*TOTAL FINAL: R$ ${(precoTotalProdutos + taxaEntregaAtual).toFixed(2).replace('.', ',')}*`;
 
         window.open(`https://wa.me/557498105859?text=${encodeURIComponent(mensagem)}`, '_blank');
@@ -135,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         btn.style.backgroundColor = "";
         document.getElementById('btn-voltar').style.display = "none";
     };
-});
+}); 
 
 function monitorarStatusLoja() {
     if (typeof firebase === 'undefined') return;
@@ -166,7 +250,7 @@ document.addEventListener('keydown', (event) => {
     }
 });
 
-window.verificarSenha = function() {
+window.verificarSenha = function () {
     const campoSenha = document.getElementById('senha-admin');
     if (campoSenha.value === SENHA_CORRETA) {
         document.getElementById('admin-login').style.display = 'none';
@@ -176,7 +260,7 @@ window.verificarSenha = function() {
     }
 };
 
-window.alternarLoja = function(status) {
+window.alternarLoja = function (status) {
     if (typeof firebase !== 'undefined') {
         firebase.database().ref('configuracoes/statusLoja').set(status)
             .then(() => {
